@@ -11,6 +11,14 @@
   ],
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rokkit-exe/mycopilot.git"
+  },
+  "keywords": [
+    "vscode",
+    "extension"
+  ],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
