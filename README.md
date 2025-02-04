@@ -1,71 +1,121 @@
-# mycopilot README
+# MyCopilot
 
-This is the README for your extension "mycopilot". After writing up a brief description, we recommend including the following sections.
+Visual Studio Code extension that aimes to replace Github Copilot Chat with local LLMs executed locally using Ollama.
 
-## Features
+## Extension settings
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Ollama Models
 
-For example if there is an image subfolder under your extension project workspace:
+Default:
 
-\!\[feature X\]\(images/feature-x.png\)
+```jsx
+{ "name": "Qwen2.5-Coder:3b", "value": "qwen2.5-coder:3b" },
+{ "name": "DeepSeek-coder-v2:16b", "value": "deepseek-coder-v2:16b" },
+{ "name": "CodeLlama:13b", "value": "codellama:13b" },
+{ "name": "DeepSeek-r1:14b", "value": "deepseek-r1:14b" },
+{ "name": "Mistal", "value": "mistral:7b" }
+```
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+<aside>
+💡
 
-## Requirements
+Make sur you pull the models before use
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+</aside>
 
-## Extension Settings
+Example:
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+```jsx
+ollama pull qwen2.5-coder:3b
+```
 
-For example:
+### Ollama Url
 
-This extension contributes the following settings:
+This is the default Ollama API url when you execute `ollama serve` 
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Default: `http://127.0.0.1:11434` 
 
-## Known Issues
+### System Prompt
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Default:
 
-## Release Notes
+```markdown
+You are a highly skilled software engineer chatbot with deep expertise in programming, 
+software architecture, and development best practices. Your primary goal is to provide clear, 
+accurate, and efficient answers to users' programming-related questions.
 
-Users appreciate release notes as you update your extension.
+Capabilities & Knowledge Areas:
+- Programming Languages: Expert in Python, JavaScript, TypeScript, Java, C#, C++, Go, Rust, PHP, Kotlin.
+- Frameworks & Libraries: Proficient in React, Angular, Vue.js, Django, Flask, Express.js, .NET, Spring Boot, FastAPI, and more.
+- Backend & APIs: Strong understanding of REST, GraphQL, gRPC, WebSockets, authentication, and API security.
+- Databases: Knowledgeable in SQL (PostgreSQL, MySQL, MSSQL) and NoSQL (MongoDB, Redis, Firebase).
+- DevOps & Infrastructure: Experienced with Docker, Kubernetes, CI/CD, cloud services (AWS, GCP, Azure), and Linux system administration.
+- Software Engineering Principles: Covers design patterns, SOLID principles, DDD, microservices, monoliths, and event-driven architectures.
+- Debugging & Optimization: Assists with performance tuning, memory management, and debugging techniques.
 
-### 1.0.0
+Response Style & Expectations:
+- Always provide accurate, concise, and practical solutions.
+- Offer code snippets when applicable, following best practices and industry standards.
+- Break down complex concepts into clear and understandable explanations.
+- If a solution depends on external libraries or tools, mention installation steps and usage.
+- When security risks are present, warn the user and suggest best practices.
+- If you don’t have enough information, encourage the user to provide more details.
 
-Initial release of ...
+Constraints:
+- If a question involves deprecated or insecure practices, suggest modern alternatives.
+- if you don't know the answer, respond with "I'm not sure, could you provide more details?" 
+- You will respond in a markdown format.
+```
 
-### 1.0.1
+<aside>
+💡
 
-Fixed issue #.
+The LLM response will be formatted from Markdown to HTML so leave the last line in your prompt → - You will respond in a markdown format.
 
-### 1.1.0
+</aside>
 
-Added features X, Y, and Z.
+## Installation
 
----
+### Requirements:
 
-## Following extension guidelines
+make sure you have `Node.js` and `npm` installed 
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+Building the extension
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+```markdown
+git clone ...
+```
 
-## Working with Markdown
+Change directory
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+```markdown
+cd mycopilot
+```
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+Install dependencies
 
-## For more information
+```markdown
+npm install -g typescript vsce
+```
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+```markdown
+npm install
+```
 
-**Enjoy!**
+Compile
+
+```markdown
+npm run compile
+```
+
+Package the extension (will create a `.vsix` file)
+
+```markdown
+vsce package
+```
+
+Install the `.vsix` file in Visual Studio Code
+
+```markdown
+code --install-extension myextension.vsix
+```
