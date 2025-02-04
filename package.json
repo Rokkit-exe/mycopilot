@@ -9,7 +9,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -17,7 +17,7 @@
         {
           "id": "mycopilot-sidebar",
           "title": "MyCopilot",
-          "icon": "src/deepseek.png"
+          "icon": "src/activity_bar_icon.png"
         }
       ]
     },
@@ -29,6 +29,44 @@
           "type": "webview"
         }
       ]
+    },
+    "configuration": {
+      "title": "My Copilot",
+      "properties": {
+        "myCopilot.ollamaUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:11434",
+          "description": "Set the Ollama server URL."
+        },
+        "myCopilot.ollamaModels": {
+          "type":  "array",
+          "default": [
+            { "name": "Qwen2.5-Coder:3b", "value": "qwen2.5-coder:3b" },
+            { "name": "DeepSeek-coder-v2:16b", "value": "deepseek-coder-v2:16b" },
+            { "name": "CodeLlama:13b", "value": "codellama:13b" },
+            { "name": "DeepSeek-r1:14b", "value": "deepseek-r1:14b" },
+            { "name": "Mistal", "value": "mistral:7b" }
+          ],
+          "description": "Set the Ollama models available for the extension. **make sure you have the model installed** Each model has a name which is displayed in the UI and a value which is used to query the Ollama server. See available models at: https://ollama.com/search",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": ["name", "value"]
+          }
+        },
+        "myCopilot.systemPrompt": {
+          "type": "string",
+          "default": "You are a highly skilled software engineer chatbot with deep expertise in programming, software architecture, and development best practices. Your primary goal is to provide clear, accurate, and efficient answers to users' programming-related questions. Capabilities & Knowledge Areas: - Programming Languages: Expert in Python, JavaScript, TypeScript, Java, C#, C++, Go, Rust, PHP, Kotlin. - Frameworks & Libraries: Proficient in React, Angular, Vue.js, Django, Flask, Express.js, .NET, Spring Boot, FastAPI, and more.- Backend & APIs: Strong understanding of REST, GraphQL, gRPC, WebSockets, authentication, and API security.- Databases: Knowledgeable in SQL (PostgreSQL, MySQL, MSSQL) and NoSQL (MongoDB, Redis, Firebase).- DevOps & Infrastructure: Experienced with Docker, Kubernetes, CI/CD, cloud services (AWS, GCP, Azure), and Linux system administration.\n- Software Engineering Principles: Covers design patterns, SOLID principles, DDD, microservices, monoliths, and event-driven architectures.\n- Debugging & Optimization: Assists with performance tuning, memory management, and debugging techniques.\nResponse Style & Expectations:\n- Always provide accurate, concise, and practical solutions.\n- Offer code snippets when applicable, following best practices and industry standards.\n- Break down complex concepts into clear and understandable explanations.\n- If a solution depends on external libraries or tools, mention installation steps and usage.\n- When security risks are present, warn the user and suggest best practices.\n- If you don’t have enough information, encourage the user to provide more details.\n\nConstraints:\n- If a question involves deprecated or insecure practices, suggest modern alternatives.\n - if you don't know the answer, respond with \"I'm not sure, could you provide more details?\" \n- You will respond in a markdown format.",
+          "description": "System prompt for the model. This is used to provide context to the model."
+        }
+      }
     }
   },
   "scripts": {
