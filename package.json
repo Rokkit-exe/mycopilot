@@ -11,6 +11,7 @@
   ],
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
+  "publisher": "Rokkit-exe",
   "repository": {
     "type": "git",
     "url": "https://github.com/Rokkit-exe/mycopilot.git"
