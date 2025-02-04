@@ -47,15 +47,7 @@ class ViewProvider implements vscode.WebviewViewProvider {
 
         const messages = this._context.workspaceState.get<Message[]>(State.messages) || [];
 
-        // Get URIs for CSS and JavaScript files
-        const cssUri = webviewView.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this._context.extensionPath, "src", "view.css"))
-        );
-        const jsUri = webviewView.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this._context.extensionPath, "src", "view.js"))
-        );
-
-        webviewView.webview.html = this.getViewContent(cssUri.toString(), jsUri.toString());
+        webviewView.webview.html = this.getViewContent();
 
         this.sendState(messages, this._models, webviewView);
 
@@ -99,7 +91,7 @@ class ViewProvider implements vscode.WebviewViewProvider {
     clearMessages() {
         this._context.workspaceState.update(State.messages, undefined);
         const messages = this._context.workspaceState.get<Message[]>(State.messages, []);
-        vscode.window.showInformationMessage(messages.length.toString());
+        vscode.window.showInformationMessage(`Messages cleared`);
     }
 
     updateModel(message: any) {
@@ -147,7 +139,7 @@ class ViewProvider implements vscode.WebviewViewProvider {
     }
 
     // getting the content of view.html
-    getViewContent(cssUri: string, jsUri: string): string {
+    getViewContent(): string {
         return /*html*/`
         <!DOCTYPE html>
         <html lang="en">
@@ -170,15 +162,174 @@ class ViewProvider implements vscode.WebviewViewProvider {
             <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-c.min.js" integrity="sha512-EWIJI7uQnA8ClViH2dvhYsNA7PHGSwSg03FAfulqpsFiTPHfhdQIvhkg/l3YpuXOXRF2Dk0NYKIl5zemrl1fmA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-bash.min.js" integrity="sha512-35RBtvuCKWANuRid6RXP2gYm4D5RMieVL/xbp6KiMXlIqgNrI7XRUh9HurE8lKHW4aRpC0TZU3ZfqG8qmQ35zA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/9000.0.1/components/prism-aspnet.min.js" integrity="sha512-J9vX+cO8Jnj0J63fUC5stcyzhiqBOD4gkeIVUDIPGU2+rVWVb2bkC8VNsF/i9XP1MuPCzfW+Mc9eiT6BzAYW8w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-            <link rel="stylesheet" href="${cssUri}"/>
+            <style>
+                .option_container {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                }
+
+                .clear_button {
+                    background-color: #212121;
+                    color: white;
+                    outline: none;
+                    box-shadow: none;
+                    padding: 0.3rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid lightgray;
+                }
+
+                .clear_button:hover {
+                    cursor: pointer;
+                    border: 1px solid #761ed4;
+                }
+
+                .model_select {
+                    background-color: #212121;
+                    color: white;
+                    outline: none;
+                    box-shadow: none;
+                    padding: 0.2rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid lightgray;
+                }
+
+                .model_select:hover {
+                    cursor: pointer;
+                    border: 1px solid #761ed4;
+                }
+
+                .main_container {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    height: 87vh;
+                }
+
+                .chat_container {
+                    display: flex;
+                    flex-direction: column;
+                    height: 95%;
+                    padding: 1.5rem 1rem 1.5rem 1rem;
+                    overflow-y: scroll;
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
+                    background-color: #212121;
+                    border-radius: 1rem;
+                }
+
+                .chat_container::-webkit-scrollbar {
+                    width: 0;
+                    height: 0;
+                }
+
+                .prompt_container {
+                    display: flex;
+                    flex-direction: row;
+                    flex: end;
+                    justify-content: center;
+                    align-items: center;
+                    background-color: #212121;
+                    height: 4rem;
+                    margin-top: 1rem;
+                    border-radius: 1rem;
+                }
+
+                .send_button {
+                    margin: 0;
+                    background-color: #4d6aff;
+                }
+
+                .user_message {
+                    margin-bottom: 1rem;
+                    font-size: 1rem;
+                    padding-bottom: 1rem;
+                }
+
+                .assistant_message {
+                    margin-bottom: 1rem;
+                    font-size: 1rem;
+                    padding-bottom: 1rem;
+                }
+
+                .icon {
+                    width: 40px;
+                    height: 40px;
+                }
+
+                .send_icon {
+                    color: white;
+                }
+
+                .send_icon:hover {
+                    cursor: pointer;
+                    color: #761ed4;
+                }
+
+                .loader {
+                    border: 0.3rem solid #f3f3f3;
+                    border-top: 0.3rem solid #761ed4;
+                    border-radius: 50%;
+                    align-self: center;
+                    width: 1.5rem;
+                    height: 1.5rem;
+                    animation: spin 2s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+
+                textarea {
+                    background-color: #212121;
+                    color: white;
+                    border: 0;
+                    outline: none;
+                    box-shadow: none;
+                    resize: none;
+                    font-size: 1rem;
+                    padding: 0.2rem;
+                    margin: 0.2rem;
+                    width: 85%;
+                    height: 2rem;
+                }
+
+                textarea:focus {
+                    border: none;
+                    outline: none;
+                }
+
+                pre {
+                    background-color: #212121;
+                    color: white;
+                    border: 1px solid lightgray;
+                    border-radius: 0.5rem;
+                    font-size: 1rem;
+                    padding: 1rem;
+                    margin: 1rem;
+                    overflow-x: scroll;
+                    scrollbar-width: none;
+                    -ms-overflow-style: none;
+                }
+
+                code {
+                    color: white;
+                    font-size: 1rem;
+                    box-shadow: none;
+                    background-color: transparent;
+                }
+            </style>
         </head>
         <body>
-            <div class="title_container">
-                <h2>Deep Seek Chat</h2>
+            <h2>Deep Seek Chat</h2>
+            <div class="option_container">
                 <select id="model" class="model_select">
                     
                 </select>
-                <button id="clear" class="clear_button">Clear Chat</button>
+                <button id="clear" class="clear_button">Clear</button>
             </div>
             <div class="main_container">
                 <div id="chat" class="chat_container">
@@ -190,7 +341,137 @@ class ViewProvider implements vscode.WebviewViewProvider {
                     </svg>
                 </div>
             </div>
-            <script src="${jsUri}"></script>
+            <script>
+                const vscode = acquireVsCodeApi();
+
+                window.onload = () => {
+                    getTitleContainerWidth();
+                };
+
+
+                document.getElementById('model').addEventListener('change', () => {
+                    vscode.postMessage({command: 'model', text: document.getElementById('model').value});
+                });
+
+                document.getElementById('clear').addEventListener('click', () => {
+                    document.getElementById('chat').innerHTML = '';
+                    vscode.postMessage({command: 'clear'});
+                });
+
+                document.getElementById('send').addEventListener('click', () => {
+                    if (document.getElementById('prompt').value !== '') {
+                        sendPrompt();
+                    }
+                    
+                });
+
+                document.getElementById('prompt').addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' && !event.shiftKey && document.getElementById('prompt').value !== '') {
+                        event.preventDefault(); // Prevent the default action of adding a new line
+                        sendPrompt();
+                    }
+                });
+
+                window.addEventListener('message', event => {
+                    const { command, text } = event.data;
+                    if (command === 'chatResponse') {
+                        updateResponseText(text);
+                    }
+                    if (command === 'models') {
+                        updateModels(text);
+                    }
+                    if (command === 'userMessage') {
+                        createUserMessage(text);
+                    }
+                    if (command === 'assistantMessage') {
+                        createAssistantMessage(text);
+                    }
+                });
+
+                const sendPrompt = () => {
+                    const text = document.getElementById('prompt').value;
+                    document.getElementById('prompt').value = '';
+                    createUserMessage(text);
+                    createAssistantMessage();
+                    vscode.postMessage({command: 'send', text});
+                    scrollToBottom();
+                };
+
+                const updateResponseText = (text) => {
+                    document.getElementById('response').innerHTML = marked.parse(text);
+                    Prism.highlightAll();
+                    scrollToBottom();
+                };
+
+                updateModels = (text) => {
+                    document.getElementById('model').innerHTML = '';
+                    text.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.value;
+                        option.innerHTML = model.name;
+                        document.getElementById('model').appendChild(option);
+                    });
+                };
+
+
+                const createUserMessage = (text) => {
+                    const message = document.createElement('div');
+                    const messageText = document.createElement('div');
+                    const icon = document.createElement('img');
+                    icon.src = "https://img.icons8.com/?size=48&id=kDoeg22e5jUY&format=png";
+                    icon.classList.add('icon');
+                    messageText.innerHTML = text;
+                    message.appendChild(icon);
+                    message.appendChild(messageText);
+                    message.classList.add('user_message');
+                    document.getElementById('chat').appendChild(message);
+                    scrollToBottom();
+                };
+
+                const createAssistantMessage = (text="") => {
+                    const message = document.createElement('div');
+                    const messageText = document.createElement('div');
+                    const icon = document.createElement('img');
+                    const response = document.getElementById('response');
+                    if (response) {
+                        response.id = 'old-response';
+                    }
+                    icon.src = "https://cdn-icons-png.flaticon.com/128/16921/16921802.png";
+                    icon.classList.add('icon');
+                    messageText.id = 'response';
+                    message.appendChild(icon);
+                    message.appendChild(messageText);
+                    message.classList.add('assistant_message');
+                    document.getElementById('chat').appendChild(message);
+                    if (text !== "") {
+                        messageText.innerHTML = marked.parse(text);
+                        Prism.highlightAll();
+                    }
+                    else {
+                        messageText.appendChild(createLoadingAnimation());
+                    }
+                    scrollToBottom();
+                };
+
+                const createLoadingAnimation = () => {
+                    const loading = document.createElement('div');
+                    loading.classList.add('loader');
+                    return loading;
+                };
+
+                function scrollToBottom() {
+                    const chatContainer = document.getElementById('chat');
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                };
+
+                function getTitleContainerWidth() {
+                    const titleContainer = document.querySelector('.title_container');
+                    if (titleContainer) {
+                        const width = titleContainer.offsetWidth;
+                        console.log(width);
+                    };
+                };
+            </script>
         </body>
         </html>`;
     }

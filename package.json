@@ -12,6 +12,7 @@
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "publisher": "Rokkit-exe",
+  "icon": "mycopilot.jpg",
   "repository": {
     "type": "git",
     "url": "https://github.com/Rokkit-exe/mycopilot.git"
@@ -26,7 +27,7 @@
         {
           "id": "mycopilot-sidebar",
           "title": "MyCopilot",
-          "icon": "src/activity_bar_icon.png"
+          "icon": "activity_bar_icon.png"
         }
       ]
     },
